@@ -1,0 +1,10 @@
+[Unit]
+Description=Sync latest Google Antigravity packages into local pacman repository
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=${exec_start}
+Nice=10
+IOSchedulingClass=idle

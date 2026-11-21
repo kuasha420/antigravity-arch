@@ -1,0 +1,13 @@
+# antigravity-arch: conditional @parcel/watcher guard
+_bundled_watcher_pkg="$pkgdir/opt/antigravity-ide/resources/app/node_modules/@parcel/watcher/package.json"
+_bundled_watcher_ver=""
+if [[ -f "$_bundled_watcher_pkg" ]]; then
+    _bundled_watcher_ver="$(sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$_bundled_watcher_pkg" | head -n1)"
+fi
+if [[ -n "$_bundled_watcher_ver" && "$(vercmp "$_bundled_watcher_ver" "${_watcher_ver:-2.5.6}")" -lt 0 ]]; then
+    msg2 "Patching bundled @parcel/watcher (${_bundled_watcher_ver} -> ${_watcher_ver:-2.5.6})"
+    install -Dm755 package/watcher.node \
+        "$pkgdir/opt/antigravity-ide/resources/app/node_modules/@parcel/watcher/build/Release/watcher.node"
+else
+    msg2 "Keeping upstream @parcel/watcher (${_bundled_watcher_ver:-unknown})"
+fi

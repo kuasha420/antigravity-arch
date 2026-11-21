@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Antigravity
+Comment=Google Antigravity agentic platform
+Exec=/usr/bin/antigravity %U
+Icon=antigravity
+Type=Application
+StartupNotify=false
+StartupWMClass=Antigravity
+Categories=Development;Utility;

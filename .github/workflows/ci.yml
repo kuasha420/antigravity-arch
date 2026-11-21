@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test-and-lint:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dev dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+
+      - name: Ruff lint
+        run: ruff check src tests
+
+      - name: Pytest hermetic suite
+        run: pytest -v
+
+  arch-packaging-syntax:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:base-devel
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate PKGBUILDs and shell assets
+        run: |
+          bash -n packaging/PKGBUILD
+          bash -n src/antigravity_arch/assets/fallback/antigravity/PKGBUILD
+          bash -n src/antigravity_arch/assets/fallback/antigravity-cli/PKGBUILD
+          bash -n src/antigravity_arch/assets/fallback/antigravity-ide/PKGBUILD
+          bash -n src/antigravity_arch/assets/fallback/antigravity-ide/antigravity-ide.sh
+
+      - name: Run pytest against native Arch vercmp
+        run: |
+          pacman -Sy --noconfirm python python-pytest
+          PYTHONPATH=src pytest -v

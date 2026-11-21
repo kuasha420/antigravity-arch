@@ -1,0 +1,75 @@
+# Cleanroom fallback PKGBUILD for antigravity-ide (used only if AUR is unreachable and uncached)
+pkgname=antigravity-ide
+pkgver=0.0.0
+pkgrel=1
+pkgdesc='An agentic development platform from Google, evolving the IDE into the agent-first era'
+arch=(aarch64 x86_64)
+url='https://antigravity.google/'
+license=(LicenseRef-Google-Antigravity)
+depends=(alsa-lib at-spi2-core bash cairo curl dbus expat glib2 glibc gtk3 libcups
+         libgcc libsecret libsoup3 libstdc++ libx11 libxcb libxcomposite libxdamage
+         libxext libxfixes libxkbcommon libxkbfile libxrandr mesa nspr nss openssl
+         pango systemd-libs util-linux-libs webkit2gtk-4.1)
+conflicts=('antigravity<2.0')
+options=(!strip !debug)
+install=$pkgname.install
+_watcher_ver=2.5.6
+_build=0
+source=(antigravity-ide.sh
+        antigravity-ide.desktop
+        antigravity-ide-url-handler.desktop)
+source_x86_64=("${pkgname}-${pkgver}-x86_64.tar.gz::https://edgedl.me.gvt1.com/edgedl/release2/j0qc3/antigravity/stable/${pkgver}-${_build}/linux-x64/Antigravity%20IDE.tar.gz"
+               "watcher-x64-${_watcher_ver}.tgz::https://registry.npmjs.org/@parcel/watcher-linux-x64-glibc/-/watcher-linux-x64-glibc-${_watcher_ver}.tgz")
+source_aarch64=("${pkgname}-${pkgver}-aarch64.tar.gz::https://edgedl.me.gvt1.com/edgedl/release2/j0qc3/antigravity/stable/${pkgver}-${_build}/linux-arm/Antigravity%20IDE.tar.gz"
+                "watcher-arm64-${_watcher_ver}.tgz::https://registry.npmjs.org/@parcel/watcher-linux-arm64-glibc/-/watcher-linux-arm64-glibc-${_watcher_ver}.tgz")
+b2sums=('4c257e6d0eea84a736377633c2196c748fcb89b259d4201157abda58d814772976fdb5dba98a0be8c9e1db86024db12841447ef5e496289fb7dfb310075c0f82'
+        '0285665a7f5605f5f3aa168ffcca70c302dc7c4981965405e9396b6c38d70f5bd5e9faec47aa082feb918d6297325c68607864928dc98d5dea96ee5d9ed23807'
+        '2d8c2b1f545a55b7ad988e802e76ec41eac49dfea02247d0f27c08dab0e074cbd2f60bc2d2e5722d535a853f3b748167b002ccccee66df8066554bb0e8973663')
+b2sums_x86_64=('0'
+               '8a1b93db2872a1eb1dc095cd913c44c52a29adb5bd9f1c608e3baa2d5504c4fd0e72e9f429cbf931fb101f325d53f6b66d954ed40219a9f3099513924891d5fe')
+b2sums_aarch64=('0'
+                '7c646a9085006c79f346b56f04e68be3708a878625aac8bf948c7bc5dccee6c7231206230be351fb2d4e6e9c58e9abcab55dd474a135484f4732738948e7a8d5')
+
+package() {
+    install -d "$pkgdir/opt"
+    cp -a "Antigravity IDE" "$pkgdir/opt/antigravity-ide"
+    rm -rf "$pkgdir/opt/antigravity-ide/resources/completions"
+
+    # antigravity-arch: conditional @parcel/watcher guard
+    _bundled_watcher_pkg="$pkgdir/opt/antigravity-ide/resources/app/node_modules/@parcel/watcher/package.json"
+    _bundled_watcher_ver=""
+    if [[ -f "$_bundled_watcher_pkg" ]]; then
+        _bundled_watcher_ver="$(sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$_bundled_watcher_pkg" | head -n1)"
+    fi
+    if [[ -n "$_bundled_watcher_ver" && "$(vercmp "$_bundled_watcher_ver" "${_watcher_ver:-2.5.6}")" -lt 0 ]]; then
+        msg2 "Patching bundled @parcel/watcher (${_bundled_watcher_ver} -> ${_watcher_ver:-2.5.6})"
+        install -Dm755 package/watcher.node \
+            "$pkgdir/opt/antigravity-ide/resources/app/node_modules/@parcel/watcher/build/Release/watcher.node"
+    else
+        msg2 "Keeping upstream @parcel/watcher (${_bundled_watcher_ver:-unknown})"
+    fi
+
+    install -Dm755 antigravity-ide.sh "$pkgdir/usr/bin/$pkgname"
+
+    install -d "$pkgdir/usr/share/licenses/$pkgname"
+    if [[ -f "$pkgdir/opt/antigravity-ide/resources/app/LICENSE.txt" ]]; then
+        ln -s /opt/antigravity-ide/resources/app/LICENSE.txt -t "$pkgdir/usr/share/licenses/$pkgname"
+    fi
+    if [[ -f "$pkgdir/opt/antigravity-ide/LICENSES.chromium.html" ]]; then
+        ln -s /opt/antigravity-ide/LICENSES.chromium.html -t "$pkgdir/usr/share/licenses/$pkgname"
+    fi
+
+    install -Dm644 antigravity-ide.desktop -t "$pkgdir/usr/share/applications"
+    install -Dm644 antigravity-ide-url-handler.desktop -t "$pkgdir/usr/share/applications"
+
+    cd "Antigravity IDE"
+    if [[ -f "resources/completions/bash/$pkgname" ]]; then
+        install -Dm644 "resources/completions/bash/$pkgname" -t "$pkgdir/usr/share/bash-completion/completions"
+    fi
+    if [[ -f "resources/completions/zsh/_$pkgname" ]]; then
+        install -Dm644 "resources/completions/zsh/_$pkgname" -t "$pkgdir/usr/share/zsh/site-functions"
+    fi
+    if [[ -f "resources/app/resources/linux/code.png" ]]; then
+        install -Dm644 "resources/app/resources/linux/code.png" "$pkgdir/usr/share/pixmaps/$pkgname.png"
+    fi
+}

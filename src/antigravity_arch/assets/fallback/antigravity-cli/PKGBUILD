@@ -1,0 +1,22 @@
+# Cleanroom fallback PKGBUILD for antigravity-cli (used only if AUR is unreachable and uncached)
+pkgname=antigravity-cli
+pkgver=0.0.0_0
+pkgrel=1
+pkgdesc="Google's agentic development platform (CLI companion)"
+arch=('x86_64' 'aarch64')
+url='https://antigravity.google/product/antigravity-cli'
+license=('LicenseRef-Google-Antigravity')
+provides=('agy')
+conflicts=('agy')
+depends=('glibc')
+optdepends=('antigravity: to authenticate and share session state from the desktop application')
+options=('!strip')
+install=antigravity-cli.install
+source_x86_64=("${pkgname}-${pkgver}-x86_64.tar.gz::https://storage.googleapis.com/antigravity-public/antigravity-cli/${pkgver//_/-}/linux-x64/cli_linux_x64.tar.gz")
+source_aarch64=("${pkgname}-${pkgver}-aarch64.tar.gz::https://storage.googleapis.com/antigravity-public/antigravity-cli/${pkgver//_/-}/linux-arm/cli_linux_arm64.tar.gz")
+sha256sums_x86_64=('0')
+sha256sums_aarch64=('0')
+
+package() {
+    install -Dm755 "${srcdir}/antigravity" "${pkgdir}/usr/bin/agy"
+}

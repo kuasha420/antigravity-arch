@@ -1,0 +1,36 @@
+# Maintainer: Arafat Zahan <kuasha420@gmail.com>
+pkgname=antigravity-arch
+pkgver=0.1.0
+pkgrel=1
+pkgdesc='Native Arch Linux query, packaging, and local pacman repo sync suite for Google Antigravity'
+arch=('any')
+url='https://github.com/kuasha420/antigravity-arch'
+license=('MIT')
+depends=('python' 'pacman' 'git' 'base-devel')
+makedepends=('python-build' 'python-installer' 'python-setuptools' 'python-wheel')
+optdepends=(
+    'libnotify: desktop notifications when systemd --user timer stages updates'
+    'gnupg: optional GPG signing for local pacman repository packages'
+)
+source=()
+
+prepare() {
+    rm -rf "${srcdir}/${pkgname}-${pkgver}"
+    mkdir -p "${srcdir}/${pkgname}-${pkgver}"
+    cp -a "${startdir}/../pyproject.toml" \
+          "${startdir}/../README.md" \
+          "${startdir}/../LICENSE" \
+          "${startdir}/../src" \
+          "${srcdir}/${pkgname}-${pkgver}/"
+}
+
+build() {
+    cd "${srcdir}/${pkgname}-${pkgver}"
+    python -m build --wheel --no-isolation
+}
+
+package() {
+    cd "${srcdir}/${pkgname}-${pkgver}"
+    python -m installer --destdir="${pkgdir}" dist/*.whl
+    install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}

@@ -1,0 +1,33 @@
+# Configuration for antigravity-arch (~/.config/antigravity-arch/config.toml)
+
+[sync]
+# "local-repo" (default) publishes to a local file:// pacman repository.
+# "direct" skips /etc/pacman.conf and installs via `pacman -U`.
+mode = "local-repo"
+
+# Target packages: "all", "installed" (track only already-installed subset),
+# or an explicit list such as ["antigravity", "antigravity-cli"].
+packages = "all"
+
+# Send desktop notification via notify-send when background sync stages updates.
+notify = true
+
+# HTTP request timeout in seconds.
+http_timeout = 20
+
+[repo]
+name = "antigravity-local"
+# Must reside under a 0755-traversable path for Pacman 7's `alpm` sandbox user.
+path = "/var/cache/pacman/antigravity-local"
+# Optional GPG key ID for signing packages and the local repo database.
+# gpg_key = "YOUR_GPG_KEY_ID"
+
+[retention]
+# Retain current + 1 rollback .pkg.tar.zst per package.
+keep_packages = 2
+# Purge downloaded source tarballs after successful packaging (0 saves ~500 MB/release).
+keep_sources = 0
+
+[timer]
+# Default systemd --user sync interval when enabled via `antigravity-arch timer enable`.
+interval = "6h"

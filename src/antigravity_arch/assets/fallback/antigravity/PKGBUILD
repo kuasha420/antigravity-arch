@@ -1,0 +1,37 @@
+# Cleanroom fallback PKGBUILD for antigravity (used only if AUR is unreachable and uncached)
+pkgname=antigravity
+pkgver=0.0.0
+pkgrel=1
+pkgdesc='Google Antigravity 2.0 multi-agent orchestration platform'
+arch=(aarch64 x86_64)
+url='https://antigravity.google/product/antigravity-2'
+license=(LicenseRef-Google-Antigravity)
+depends=(alsa-lib at-spi2-core cairo dbus expat glib2 glibc gtk3 libcups libgcc
+         libx11 libxcb libxcomposite libxdamage libxext libxfixes libxkbcommon
+         libxrandr mesa nspr nss pango systemd-libs)
+options=(!strip !debug)
+_build=0
+source=(antigravity.desktop)
+source_x86_64=("Antigravity-${pkgver}-x86_64.tar.gz::https://storage.googleapis.com/antigravity-public/antigravity-hub/${pkgver}-${_build}/linux-x64/Antigravity.tar.gz")
+source_aarch64=("Antigravity-${pkgver}-aarch64.tar.gz::https://storage.googleapis.com/antigravity-public/antigravity-hub/${pkgver}-${_build}/linux-arm/Antigravity.tar.gz")
+b2sums=('a83a3cc663768752b173c99faef69f52e93c40f47eefc73b0b709f34014ee21a0fa9dc20dd6b228276c498c0bffe1ed9bf51d96fb351905b3480216c70e16f46')
+b2sums_x86_64=('0')
+b2sums_aarch64=('0')
+
+package() {
+    install -d "$pkgdir/opt"
+    cp -a Antigravity-*/ "$pkgdir/opt/Antigravity"
+
+    install -d "$pkgdir/usr/bin"
+    ln -s /opt/Antigravity/antigravity "$pkgdir/usr/bin/$pkgname"
+
+    install -d "$pkgdir/usr/share/licenses/$pkgname"
+    if [[ -f "$pkgdir/opt/Antigravity/LICENSE.electron.txt" ]]; then
+        ln -s /opt/Antigravity/LICENSE.electron.txt -t "$pkgdir/usr/share/licenses/$pkgname"
+    fi
+    if [[ -f "$pkgdir/opt/Antigravity/LICENSES.chromium.html" ]]; then
+        ln -s /opt/Antigravity/LICENSES.chromium.html -t "$pkgdir/usr/share/licenses/$pkgname"
+    fi
+
+    install -Dm644 antigravity.desktop -t "$pkgdir/usr/share/applications"
+}

@@ -1,0 +1,11 @@
+[Unit]
+Description=Periodic Google Antigravity local pacman repository sync
+
+[Timer]
+OnBootSec=10min
+OnUnitActiveSec=${interval}
+RandomizedDelaySec=15min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

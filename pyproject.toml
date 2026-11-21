@@ -1,0 +1,67 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "antigravity-arch"
+version = "0.1.0"
+description = "Native Arch Linux query, packaging, and local pacman repository sync suite for Google Antigravity"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.11"
+authors = [
+    { name = "Arafat Zahan", email = "kuasha420@gmail.com" },
+]
+keywords = ["archlinux", "pacman", "aur", "makepkg", "antigravity", "google-antigravity"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: System :: Software Distribution",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.6",
+]
+
+[project.urls]
+Homepage = "https://github.com/kuasha420/antigravity-arch"
+Repository = "https://github.com/kuasha420/antigravity-arch"
+Issues = "https://github.com/kuasha420/antigravity-arch/issues"
+
+[project.scripts]
+antigravity-arch = "antigravity_arch.cli:main"
+agy-arch = "antigravity_arch.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+antigravity_arch = [
+    "assets/*.tmpl",
+    "assets/fallback/**/*",
+    "assets/fallback/*",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+ignore = ["E501"]

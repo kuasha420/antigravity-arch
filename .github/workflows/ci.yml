@@ -48,5 +48,5 @@ jobs:
 
       - name: Run pytest against native Arch vercmp
         run: |
-          pacman -Sy --noconfirm python python-pytest
+          pacman -Syu --noconfirm python-pytest
           PYTHONPATH=src pytest -v
